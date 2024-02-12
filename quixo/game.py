@@ -34,8 +34,10 @@ class Player(ABC):
 
 
 class Game(object):
+    BOARD_DIM = 5
+
     def __init__(self) -> None:
-        self._board = np.ones((5, 5), dtype=np.uint8) * -1
+        self._board = np.ones((self.BOARD_DIM, self.BOARD_DIM), dtype=np.uint8) * -1
         self.current_player_idx = 1
 
     def get_board(self) -> np.ndarray:

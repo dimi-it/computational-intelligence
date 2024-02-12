@@ -1,25 +1,13 @@
 from dataclasses import dataclass, field
 
+from quixo.data_bags import PopulationParameters
+from quixo.function_set import FunctionSet
+from quixo.terminal_set import TerminalSet
+
 
 class Population:
-    def __init__(self):
-        pass
+    def __init__(self, population_param: PopulationParameters):
+        self.population_param = population_param
 
+    def initialize(self, ):
 
-@dataclass
-class InitParameters:
-    use_grow: bool = field(default=True)
-    use_full: bool = field(default=True)
-    use_different_depth: bool = field(default=True)
-
-
-@dataclass
-class AgentParameters:
-    max_depth: int
-    max_branching_factor: int
-
-
-@dataclass
-class PopulationParameters:
-    agent_param: AgentParameters
-    init_param: InitParameters
