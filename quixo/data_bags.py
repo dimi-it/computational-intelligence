@@ -5,7 +5,7 @@ from typing import Set, List, Callable
 from quixo.function import Function
 from quixo.function_set import FunctionSet
 from quixo.terminal_set import TerminalSet
-from quixo.value import ValuePoint
+from quixo.value_point import ValuePoint
 
 
 @dataclass

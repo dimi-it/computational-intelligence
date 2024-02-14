@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from quixo.function import Function
-from quixo.value import ValuePoint
+from quixo.value_point import ValuePoint
 
 
 class Node:
@@ -28,6 +28,10 @@ class Node:
     @property
     def is_terminal(self) -> bool:
         return self._is_terminal
+
+    @property
+    def is_function(self) -> bool:
+        return not self._is_terminal
 
     @property
     def function(self) -> Function:

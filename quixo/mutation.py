@@ -1,8 +1,9 @@
 from copy import deepcopy
+from typing import Optional
 
 from quixo.data_bags import PopulationParameters
 from quixo.function_set import FunctionSet
-from quixo.gp_agent import GeneticProgrammingAgent
+from quixo.individual import Individual
 from quixo.graph import GraphExtended
 from quixo.node import Node
 from quixo.terminal_set import TerminalSet
@@ -10,8 +11,8 @@ from quixo.terminal_set import TerminalSet
 
 class Mutation:
     @staticmethod
-    def one_node_mutation(p: GeneticProgrammingAgent,
-                          population_param: PopulationParameters) -> GeneticProgrammingAgent:
+    def one_node_mutation(p: Individual,
+                          population_param: PopulationParameters, id: Optional[int] = None) -> Individual:
         p_genome = deepcopy(p.genome)
         p_edge = GraphExtended.choice_edge(p_genome, population_param.rnd)
         p_root = list(p_genome.nodes)[0]
@@ -23,7 +24,8 @@ class Mutation:
             new_node = Node(node.id, TerminalSet.get_random_terminal(population_param.rnd, to_exclude=node))
         else:
             new_node = Node(node.id,
-                            FunctionSet.get_random_function(population_param.rnd, to_exclude=node, inputs=node.function.inputs, outputs=node.function.outputs)
+                            FunctionSet.get_random_function(population_param.rnd, to_exclude=node,
+                                                            inputs=node.function.inputs, outputs=node.function.outputs)
                             if node != p_root else
                             FunctionSet.get_random_action_function(population_param.rnd, to_exclude=node)
                             )
@@ -37,4 +39,4 @@ class Mutation:
                 p_genome.add_edge(edge[0], edge[1])
         for edge in p_node_edges:
             p_genome.add_edge(new_node, edge[1])
-        return GeneticProgrammingAgent(p_genome)
+        return Individual(id, p_genome)

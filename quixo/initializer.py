@@ -6,17 +6,17 @@ import networkx as nx
 from quixo.data_bags import InitParameters, AgentParameters, PopulationParameters
 from quixo.function import Function
 from quixo.function_set import FunctionSet
-from quixo.gp_agent import GeneticProgrammingAgent
+from quixo.individual import Individual
 from quixo.node import Node
 from quixo.terminal_set import TerminalSet
-from quixo.value import ValuePoint
+from quixo.value_point import ValuePoint
 
 
 class Initializer:
     def __init__(self, population_param: PopulationParameters):
         self._population_param = population_param
 
-    def initialize_population(self) -> Sequence[GeneticProgrammingAgent]:
+    def initialize_population(self) -> Sequence[Individual]:
         assert self._population_param.init_param.use_grow or self._population_param.init_param.use_full, "No initialization method defined(use grow, full or both)"
 
         usable_depth = self._population_param.agent_param.max_depth - 1
@@ -34,14 +34,16 @@ class Initializer:
         use_both_method = self._population_param.init_param.use_grow and self._population_param.init_param.use_full
         is_grow = self._population_param.init_param.use_grow
         genomes = []
+        individual_count = 0
         for individuals, depth in individuals_and_depth:
             for _ in range(individuals):
                 if use_both_method:
                     is_grow = not is_grow
                 if is_grow:
-                    genomes.append(GeneticProgrammingAgent(self._create_tree(depth, not is_grow)))
+                    genomes.append(Individual(individual_count, self._create_tree(depth, not is_grow)))
                 else:
-                    genomes.append(GeneticProgrammingAgent(self._create_tree(depth, not is_grow)))
+                    genomes.append(Individual(individual_count, self._create_tree(depth, not is_grow)))
+                individual_count += 1
 
         assert len(genomes) == self._population_param.population_size, f"Something went wrong, generated {len(genomes)} individuals instead of {self._population_param.population_size}"
         return genomes
@@ -76,7 +78,7 @@ class Initializer:
             node_count += len(in_layer_nodes)
 
             _add_node_to_graph(graph, previous_layer_nodes, in_layer_nodes)
-            previous_layer_nodes = [n for n in in_layer_nodes if not n.is_terminal]
+            previous_layer_nodes = [n for n in in_layer_nodes if n.is_function]
 
         last_leafs = [Node(node_count + i, l) for i, l in enumerate(
             TerminalSet.get_random_terminals(self._population_param.rnd, sum(node.function.inputs for node in previous_layer_nodes))

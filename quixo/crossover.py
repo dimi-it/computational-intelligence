@@ -1,19 +1,20 @@
 from copy import deepcopy
 from random import Random
+from typing import Optional
 
 import networkx as nx
 from networkx.classes.reportviews import OutEdgeView
 
 from quixo.data_bags import PopulationParameters
-from quixo.gp_agent import GeneticProgrammingAgent
+from quixo.individual import Individual
 from quixo.graph import GraphExtended
 from quixo.node import Node
 
 
 class Crossover:
     @staticmethod
-    def one_node_xover(p1: GeneticProgrammingAgent, p2: GeneticProgrammingAgent,
-                       population_param: PopulationParameters) -> GeneticProgrammingAgent:
+    def one_node_xover(p1: Individual, p2: Individual,
+                       population_param: PopulationParameters, id: Optional[int] = None) -> Individual:
         p1_genome = deepcopy(p1.genome)
         p2_genome = deepcopy(p2.genome)
         p1_edge = GraphExtended.choice_edge(p1_genome, population_param.rnd)
@@ -30,4 +31,4 @@ class Crossover:
         child_genome.remove_edge(p2_edge[0], p2_edge[1])
         GraphExtended.remove_unconnected(child_genome, p1_root)
         GraphExtended.reidentify_nodes(child_genome, p1_root)
-        return GeneticProgrammingAgent(child_genome)
+        return Individual(id, child_genome)

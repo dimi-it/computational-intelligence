@@ -1,10 +1,10 @@
 from random import Random
-from typing import Set, List
+from typing import Set, List, Optional
 
 from quixo.decorator import classproperty
 from quixo.function_set import _get_random_from_set
 from quixo.quixo_game import QuixoGame
-from quixo.value import ValuePoint
+from quixo.value_point import ValuePoint
 
 
 class TerminalSet:
@@ -18,7 +18,7 @@ class TerminalSet:
         return cls._set
 
     @classmethod
-    def get_random_terminal(cls, rnd: Random, to_exclude: None | ValuePoint = None) -> ValuePoint:
+    def get_random_terminal(cls, rnd: Random, to_exclude: Optional[ValuePoint] = None) -> ValuePoint:
         return _get_random_from_set(cls._set, rnd, to_exclude)
 
     @classmethod
