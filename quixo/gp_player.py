@@ -3,7 +3,7 @@ from typing import List, Optional
 
 import networkx as nx
 
-from quixo.game import Player, Move, Game
+from quixo.game import Player, MoveDirection, Game
 from quixo.individual import Individual
 from quixo.my_move import MyMove
 from quixo.node import Node
@@ -31,22 +31,23 @@ class GeneticProgrammingPlayer(Player):
             descendants_results.append(res)
         result = node.function.op(descendants_results, game)
         if node.function.is_action:
-            print(f"Node Res: {result}, Move {node.function.name}")
+            # print(f"Node Res: {result}, Move {node.function.name}")
             if not result.is_nil():
-                test_move = MyMove(result.point, Move[node.function.name.upper()])
+                test_move = MyMove(result.point, MoveDirection[node.function.name.upper()])
                 if game.is_move_doable(test_move):
-                    print(f"AGENT => Res: {result}, Move {node.function.name}")
+                    print(f"AGENT => Pos: {result}, Dir {node.function.name}")
                     return result, test_move
         return result, None
 
-    def make_move(self, game: QuixoGame) -> tuple[tuple[int, int], Move]:
+    def make_move(self, game: QuixoGame) -> tuple[tuple[int, int], MoveDirection]:
         _, move = self._make_move_recursive(list(self._brain.genome.nodes)[0], game)
         if move is None:
-            print("Damn, no doable move found ")
+            # print("Damn, no doable move found ")
             assert self._enable_random_move, "Random move not enabled, no move available"
-            from_pos = (self._rnd.randint(0, 4), self._rnd.randint(0, 4))
-            move = self._rnd.choice([Move.TOP, Move.BOTTOM, Move.LEFT, Move.RIGHT])
-            print(f"AGENT => RND Res: {from_pos}, Move {move}")
-            return from_pos, move
+            while True:
+                move = self._rnd.choice(game.available_moves_list)
+                if game.is_move_doable(move):
+                    break
+            print(f"AGENT RND => Pos: {move.position}, Dir: {move.direction}")
         return move.to_tuple
 

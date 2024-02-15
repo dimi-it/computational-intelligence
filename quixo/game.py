@@ -6,7 +6,7 @@ import numpy as np
 # Rules on PDF
 
 
-class Move(Enum):
+class MoveDirection(Enum):
     '''
     Selects where you want to place the taken piece. The rest of the pieces are shifted
     '''
@@ -22,7 +22,7 @@ class Player(ABC):
         pass
 
     @abstractmethod
-    def make_move(self, game: 'Game') -> tuple[tuple[int, int], Move]:
+    def make_move(self, game: 'Game') -> tuple[tuple[int, int], MoveDirection]:
         '''
         The game accepts coordinates of the type (X, Y). X goes from left to right, while Y goes from top to bottom, as in 2D graphics.
         Thus, the coordinates that this method returns shall be in the (X, Y) format.
@@ -103,7 +103,7 @@ class Game(object):
             # self.print()
         return winner
 
-    def __move(self, from_pos: tuple[int, int], slide: Move, player_id: int) -> bool:
+    def __move(self, from_pos: tuple[int, int], slide: MoveDirection, player_id: int) -> bool:
         '''Perform a move'''
         if player_id > 2:
             return False
@@ -134,7 +134,7 @@ class Game(object):
             self._board[from_pos] = player_id
         return acceptable
 
-    def __slide(self, from_pos: tuple[int, int], slide: Move) -> bool:
+    def __slide(self, from_pos: tuple[int, int], slide: MoveDirection) -> bool:
         '''Slide the other pieces'''
         # define the corners
         SIDES = [(0, 0), (0, 4), (4, 0), (4, 4)]
@@ -142,34 +142,34 @@ class Game(object):
         if from_pos not in SIDES:
             # if it is at the TOP, it can be moved down, left or right
             acceptable_top: bool = from_pos[0] == 0 and (
-                slide == Move.BOTTOM or slide == Move.LEFT or slide == Move.RIGHT
+                    slide == MoveDirection.BOTTOM or slide == MoveDirection.LEFT or slide == MoveDirection.RIGHT
             )
             # if it is at the BOTTOM, it can be moved up, left or right
             acceptable_bottom: bool = from_pos[0] == 4 and (
-                slide == Move.TOP or slide == Move.LEFT or slide == Move.RIGHT
+                    slide == MoveDirection.TOP or slide == MoveDirection.LEFT or slide == MoveDirection.RIGHT
             )
             # if it is on the LEFT, it can be moved up, down or right
             acceptable_left: bool = from_pos[1] == 0 and (
-                slide == Move.BOTTOM or slide == Move.TOP or slide == Move.RIGHT
+                    slide == MoveDirection.BOTTOM or slide == MoveDirection.TOP or slide == MoveDirection.RIGHT
             )
             # if it is on the RIGHT, it can be moved up, down or left
             acceptable_right: bool = from_pos[1] == 4 and (
-                slide == Move.BOTTOM or slide == Move.TOP or slide == Move.LEFT
+                    slide == MoveDirection.BOTTOM or slide == MoveDirection.TOP or slide == MoveDirection.LEFT
             )
         # if the piece position is in a corner
         else:
             # if it is in the upper left corner, it can be moved to the right and down
             acceptable_top: bool = from_pos == (0, 0) and (
-                slide == Move.BOTTOM or slide == Move.RIGHT)
+                    slide == MoveDirection.BOTTOM or slide == MoveDirection.RIGHT)
             # if it is in the lower left corner, it can be moved to the right and up
             acceptable_left: bool = from_pos == (4, 0) and (
-                slide == Move.TOP or slide == Move.RIGHT)
+                    slide == MoveDirection.TOP or slide == MoveDirection.RIGHT)
             # if it is in the upper right corner, it can be moved to the left and down
             acceptable_right: bool = from_pos == (0, 4) and (
-                slide == Move.BOTTOM or slide == Move.LEFT)
+                    slide == MoveDirection.BOTTOM or slide == MoveDirection.LEFT)
             # if it is in the lower right corner, it can be moved to the left and up
             acceptable_bottom: bool = from_pos == (4, 4) and (
-                slide == Move.TOP or slide == Move.LEFT)
+                    slide == MoveDirection.TOP or slide == MoveDirection.LEFT)
         # check if the move is acceptable
         acceptable: bool = acceptable_top or acceptable_bottom or acceptable_left or acceptable_right
         # if it is
@@ -177,7 +177,7 @@ class Game(object):
             # take the piece
             piece = self._board[from_pos]
             # if the player wants to slide it to the left
-            if slide == Move.LEFT:
+            if slide == MoveDirection.LEFT:
                 # for each column starting from the column of the piece and moving to the left
                 for i in range(from_pos[1], 0, -1):
                     # copy the value contained in the same row and the previous column
@@ -186,7 +186,7 @@ class Game(object):
                 # move the piece to the left
                 self._board[(from_pos[0], 0)] = piece
             # if the player wants to slide it to the right
-            elif slide == Move.RIGHT:
+            elif slide == MoveDirection.RIGHT:
                 # for each column starting from the column of the piece and moving to the right
                 for i in range(from_pos[1], self._board.shape[1] - 1, 1):
                     # copy the value contained in the same row and the following column
@@ -195,7 +195,7 @@ class Game(object):
                 # move the piece to the right
                 self._board[(from_pos[0], self._board.shape[1] - 1)] = piece
             # if the player wants to slide it upward
-            elif slide == Move.TOP:
+            elif slide == MoveDirection.TOP:
                 # for each row starting from the row of the piece and going upward
                 for i in range(from_pos[0], 0, -1):
                     # copy the value contained in the same column and the previous row
@@ -204,7 +204,7 @@ class Game(object):
                 # move the piece up
                 self._board[(0, from_pos[1])] = piece
             # if the player wants to slide it downward
-            elif slide == Move.BOTTOM:
+            elif slide == MoveDirection.BOTTOM:
                 # for each row starting from the row of the piece and going downward
                 for i in range(from_pos[0], self._board.shape[0] - 1, 1):
                     # copy the value contained in the same column and the following row

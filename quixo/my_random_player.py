@@ -1,14 +1,19 @@
-from quixo.game import Player, Move
+from quixo.game import Player, MoveDirection
 from random import Random
+
+from quixo.my_move import MyMove
+from quixo.quixo_game import QuixoGame
 
 
 class MyRandomPlayer(Player):
     def __init__(self, seed: int) -> None:
         super().__init__()
-        self.rnd = Random(seed)
+        self._rnd = Random(seed)
 
-    def make_move(self, game: 'Game') -> tuple[tuple[int, int], Move]:
-        from_pos = (self.rnd.randint(0, 4), self.rnd.randint(0, 4))
-        move = self.rnd.choice([Move.TOP, Move.BOTTOM, Move.LEFT, Move.RIGHT])
-        print(f"RANDOM => Res: {from_pos}, Move {move}")
-        return from_pos, move
+    def make_move(self, game: QuixoGame) -> tuple[tuple[int, int], MoveDirection]:
+        while True:
+            move = self._rnd.choice(game.available_moves_list)
+            if game.is_move_doable(move):
+                break
+        print(f"RANDOM => Pos: {move.position}, Dir: {move.direction}")
+        return move.to_tuple

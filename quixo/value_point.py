@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple
 
 from quixo.decorator import classproperty
 
@@ -20,7 +20,7 @@ class ValuePoint:
         return self._value is None
 
     @property
-    def point(self) -> Sequence[int]:
+    def point(self) -> Tuple[int, int]:
         assert not self.is_nil(), "ValuePoint is None"
         return self._value
 
