@@ -10,6 +10,7 @@ from quixo.my_move import MyMove
 class QuixoGame(Game):
     def __init__(self) -> None:
         super().__init__()
+        self._move_count = 0
 
     @cached_property
     def available_moves_list(self) -> List[MyMove]:
@@ -41,6 +42,10 @@ class QuixoGame(Game):
     @cached_property
     def available_moves_set(self) -> Set[MyMove]:
         return set(self.available_moves_list)
+
+    @property
+    def move_count(self) -> int:
+        return self._move_count
 
     def check_winner(self) -> int:
         '''Check the winner. Returns the player ID of the winner if any, otherwise returns -1'''
@@ -111,6 +116,7 @@ class QuixoGame(Game):
 
             from_pos, slide = players[self.current_player_idx].make_move(self)
             self.__move(from_pos, slide, self.current_player_idx)
+            self._move_count += 1
 
             winner = self.check_winner()
             # self.print()
