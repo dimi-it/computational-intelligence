@@ -98,9 +98,9 @@ class Game(object):
                 from_pos, slide = players[self.current_player_idx].make_move(
                     self)
                 ok = self.__move(from_pos, slide, self.current_player_idx)
-                print(f"MOVE Pos:{from_pos}, Move:{slide}, checked:{ok}")
+                # print(f"Player:{self.current_player_idx}, Pos:{from_pos}, Move:{slide}, Checked:{ok}")
             winner = self.check_winner()
-            self.print()
+            # self.print()
         return winner
 
     def __move(self, from_pos: tuple[int, int], slide: Move, player_id: int) -> bool:

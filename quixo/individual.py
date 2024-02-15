@@ -16,6 +16,9 @@ class Individual:
     def __str__(self):
         return f"Individual {self._id}, {self._genome.adj}"
 
+    def __hash__(self):
+        return hash(self.genome_adj_str)
+
     @property
     def genome(self) -> nx.DiGraph:
         assert self._genome is not None, "Genome not defined"
@@ -24,7 +27,11 @@ class Individual:
     @property
     def id(self) -> int:
         assert self._id is not None, "Id not defined"
-        return id
+        return self._id
+
+    @cached_property
+    def genome_adj_str(self):
+        return str(self._genome.adj)
 
     @cached_property
     def traversal_list(self) -> List[Node]:
