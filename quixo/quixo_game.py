@@ -8,11 +8,8 @@ from quixo.my_move import MyMove
 
 
 class QuixoGame(Game):
-    BOARD_DIM = 5
-
     def __init__(self) -> None:
-        self._board = np.ones((self.BOARD_DIM, self.BOARD_DIM), dtype=np.uint8) * -1
-        self.current_player_idx = 1
+        super().__init__()
 
     @cached_property
     def available_moves_list(self) -> List[MyMove]:
@@ -44,10 +41,6 @@ class QuixoGame(Game):
     @cached_property
     def available_moves_set(self) -> Set[MyMove]:
         return set(self.available_moves_list)
-
-    def print(self):
-        '''Prints the board. -1 are neutral pieces, 0 are pieces of player 0, 1 pieces of player 1'''
-        print(self._board)
 
     def check_winner(self) -> int:
         '''Check the winner. Returns the player ID of the winner if any, otherwise returns -1'''
