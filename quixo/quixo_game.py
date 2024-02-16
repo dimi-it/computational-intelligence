@@ -60,7 +60,7 @@ class QuixoGame(Game):
             else:
                 w = game.play(p2, p1)
                 w = (w+1) % 2
-            game.print()
+            # game.print()
             tot += w
             if change_order:
                 order = not order
@@ -137,6 +137,8 @@ class QuixoGame(Game):
             self._move_count += 1
 
             winner = self.check_winner()
+            if self._move_count > 1000:
+                return 0
             # self.print()
         return winner
 

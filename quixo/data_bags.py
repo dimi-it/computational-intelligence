@@ -34,7 +34,9 @@ class PopulationParameters:
     tournament_depth: int
     selection_size: int
     rnd: Random = field(default=Random(123456))
-    propagate_best: bool = field(default=True)
+    keep_best: bool = field(default=True)
+    crossover_probability: float = field(default=.8)
+    mutation_probability: float = field(default=.5)
 
 
     @property

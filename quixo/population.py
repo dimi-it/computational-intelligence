@@ -2,11 +2,13 @@ import math
 from dataclasses import dataclass, field
 from typing import List
 
+from quixo.crossover import Crossover
 from quixo.data_bags import PopulationParameters
 from quixo.function_set import FunctionSet
 from quixo.gp_player import GeneticProgrammingPlayer
 from quixo.individual import Individual
 from quixo.initializer import Initializer
+from quixo.mutation import Mutation
 from quixo.quixo_game import QuixoGame
 from quixo.terminal_set import TerminalSet
 
@@ -15,22 +17,27 @@ class Population:
     def __init__(self, population_param: PopulationParameters):
         self._population_param = population_param
         self._individuals = []
+        self._selected_parents = []
         self._bests = []
         self._generation = 0
 
     def __str__(self):
         return f"""Generation: {self._generation}
-        Individuals: {len(self._individuals)}"""
+Individuals: {len(self._individuals)}"""
 
     @property
     def individuals(self) -> List[Individual]:
         return self._individuals
 
+    @property
+    def bests(self) -> List[Individual]:
+        return self._bests
+
     def initialize(self):
         initializer = Initializer(self._population_param)
         self._individuals = initializer.initialize_population()
 
-    def selection(self):
+    def selection(self) -> List[Individual]:
         selected = []
         results = {}
         tournament_size = 2 ** self._population_param.tournament_depth
@@ -52,6 +59,7 @@ class Population:
         # print(f"Best: {repr(best)}")
         self._bests.append(best)
         # print(f"Selected: {selected}")
+        return selected
 
     def _tournament(self, individuals: List[Individual]) -> Individual:
         this_level_individuals = individuals
@@ -76,3 +84,45 @@ class Population:
         w = game.play(p1, p2)
         # print(f"W: {w}")
         return w
+
+    def recombination(self, selected_parents: List[individuals]) -> List[Individual]:
+        count = 0
+        id_offset = (self._generation + 1) * 1000
+        childs = []
+        mutations = self._population_param.rnd.choices([True, False],
+                                                       weights=[self._population_param.mutation_probability,
+                                                                self._population_param.mutation_probability],
+                                                       k=self._population_param.population_size)
+
+        crossover_count = int(self._population_param.crossover_probability * self._population_param.population_size)
+        crossover_parents = self._population_param.rnd.choices(selected_parents, k=crossover_count*2)
+        for i in range(crossover_count):
+            child = Crossover.one_node_xover(crossover_parents[2 * i], crossover_parents[2 * i + 1],
+                                             self._population_param, count + id_offset)
+            if mutations[count]:
+                child = Mutation.one_node_mutation(child, self._population_param, child.id)
+            childs.append(child)
+            count += 1
+
+        reproduction_count = self._population_param.population_size - crossover_count
+        reproduction_parents = self._population_param.rnd.choices(selected_parents, k=reproduction_count)
+        for i in range(reproduction_count):
+            child = Individual(count + id_offset, reproduction_parents[i].genome, parents_id=[reproduction_parents[i].id])
+            if mutations[count]:
+                child = Mutation.one_node_mutation(child, self._population_param, child.id)
+            childs.append(child)
+            count += 1
+        return childs
+
+    def proceed_generation(self):
+        print(self)
+        self._selected_parents = self.selection()
+        childs = self.recombination(self._selected_parents)
+        self._individuals = childs
+        self._generation += 1
+        # for i in self._individuals:
+        #     i.print_graph()
+
+    def proceed_x_generation(self, x):
+        for _ in range(x):
+            self.proceed_generation()

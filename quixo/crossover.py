@@ -31,4 +31,4 @@ class Crossover:
         child_genome.remove_edge(p2_edge[0], p2_edge[1])
         GraphExtended.remove_unconnected(child_genome, p1_root)
         GraphExtended.reidentify_nodes(child_genome, p1_root)
-        return Individual(id, child_genome)
+        return Individual(id, child_genome, parents_id=[p1.id, p2.id])

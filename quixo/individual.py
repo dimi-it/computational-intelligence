@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Optional, List
+from typing import Optional, List, Sequence
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -9,9 +9,10 @@ from quixo.node import Node
 # from networkx.drawing.nx_agraph import write_dot, graphviz_layout
 
 class Individual:
-    def __init__(self, id: Optional[int] = None, genome: Optional[nx.DiGraph] = None):
+    def __init__(self, id: Optional[int] = None, genome: Optional[nx.DiGraph] = None, parents_id: Optional[Sequence[int]] = None):
         self._genome = genome
         self._id = id
+        self._parenst_id = parents_id
 
     def __str__(self):
         return f"Individual {self._id}, {self._genome.adj}"

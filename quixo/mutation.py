@@ -17,7 +17,7 @@ class Mutation:
         p_edge = GraphExtended.choice_edge(p_genome, population_param.rnd)
         p_root = list(p_genome.nodes)[0]
         node = p_edge[1]
-        print(node)
+        # print(node)
         p_parent_edges = list(p_genome.out_edges(p_edge[0]))
         p_node_edges = list(p_genome.out_edges(node))
         if node.is_terminal:
@@ -29,7 +29,7 @@ class Mutation:
                             if node != p_root else
                             FunctionSet.get_random_action_function(population_param.rnd, to_exclude=node)
                             )
-        print(new_node)
+        # print(new_node)
         p_genome.remove_node(node)
         p_genome.add_node(new_node)
         for edge in p_parent_edges:
@@ -39,4 +39,4 @@ class Mutation:
                 p_genome.add_edge(edge[0], edge[1])
         for edge in p_node_edges:
             p_genome.add_edge(new_node, edge[1])
-        return Individual(id, p_genome)
+        return Individual(id, p_genome, parents_id=[p.id])
