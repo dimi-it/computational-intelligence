@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from quixo.crossover import Crossover
 from quixo.data_bags import PopulationParameters
@@ -14,9 +14,9 @@ from quixo.terminal_set import TerminalSet
 
 
 class Population:
-    def __init__(self, population_param: PopulationParameters):
+    def __init__(self, population_param: PopulationParameters, initial_population: Optional[List[Individual]] = None):
         self._population_param = population_param
-        self._individuals = []
+        self._individuals = [] if initial_population is None else initial_population
         self._selected_parents = []
         self._bests = []
         self._generation = 0
@@ -46,7 +46,7 @@ Individuals: {len(self._individuals)}"""
                 tournament_individuals = self._population_param.rnd.sample(self.individuals, k=tournament_size)
             else:
                 tournament_individuals = self._population_param.rnd.choices(self.individuals, k=tournament_size)
-            # print(f"Tournament {i}: {tournament_individuals}")
+            print(f"Tournament {i}: {tournament_individuals}")
             winner = self._tournament(tournament_individuals)
             if winner in results:
                 results[winner] += 1
@@ -62,6 +62,7 @@ Individuals: {len(self._individuals)}"""
         return selected
 
     def _tournament(self, individuals: List[Individual]) -> Individual:
+        print(individuals)
         this_level_individuals = individuals
         next_level_individuals = []
         for d in range(self._population_param.tournament_depth):
