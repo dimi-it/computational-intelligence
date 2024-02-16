@@ -33,6 +33,10 @@ class Player(ABC):
         '''
         pass
 
+    @abstractmethod
+    def reset(self, also_rnd: bool = False):
+        pass
+
 
 class Game(object):
     BOARD_DIM = 5

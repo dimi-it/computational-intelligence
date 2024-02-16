@@ -47,6 +47,31 @@ class QuixoGame(Game):
     def move_count(self) -> int:
         return self._move_count
 
+    @staticmethod
+    def get_results_over_x_games(p1: Player, p2: Player, games: int, change_order: bool = True, reset_rnd_gen: bool = False) -> tuple[int, int]:
+        tot = 0
+        order = False
+        for i in range(games):
+            p1.reset(reset_rnd_gen)
+            p2.reset(reset_rnd_gen)
+            print(f"Game: {i}")
+            game = QuixoGame()
+            if order == change_order:
+                print("P1 vs P2")
+                w = game.play(p1, p2)
+                print(f"Wp: {w}")
+            else:
+                print("P2 vs P1")
+                w = game.play(p2, p1)
+                print(f"Wp: {w}")
+                w = (w+1) % 2
+            game.print()
+            print(f"W: {w}")
+            tot += w
+            if change_order:
+                order = not order
+        return games - tot, tot
+
     def check_winner(self) -> int:
         '''Check the winner. Returns the player ID of the winner if any, otherwise returns -1'''
         # for each row
