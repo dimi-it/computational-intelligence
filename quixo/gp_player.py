@@ -13,7 +13,7 @@ from quixo.value_point import ValuePoint
 
 class GeneticProgrammingPlayer(Player):
 
-    def __init__(self, brain: Individual, enable_random_move: Optional[bool] = False, loop_avoidance_limit: int = 5):
+    def __init__(self, brain: Individual, enable_random_move: Optional[bool] = True, loop_avoidance_limit: int = 5):
         super().__init__()
         self._brain = brain
         self._enable_random_move = enable_random_move

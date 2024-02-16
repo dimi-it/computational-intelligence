@@ -20,13 +20,22 @@ class InitParameters:
 class AgentParameters:
     max_depth: int
 
+@dataclass
+class PlayerParameters:
+    enable_random_move: bool = field(default=True)
+    loop_avoidance_limit: int = field(default=5)
 
 @dataclass
 class PopulationParameters:
     agent_param: AgentParameters
     init_param: InitParameters
+    player_param: PlayerParameters
     population_size: int
+    tournament_depth: int
+    selection_size: int
     rnd: Random = field(default=Random(123456))
+    propagate_best: bool = field(default=True)
+
 
     @property
     def random_bool(self) -> bool:

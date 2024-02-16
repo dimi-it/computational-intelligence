@@ -54,19 +54,13 @@ class QuixoGame(Game):
         for i in range(games):
             p1.reset(reset_rnd_gen)
             p2.reset(reset_rnd_gen)
-            print(f"Game: {i}")
             game = QuixoGame()
             if order == change_order:
-                print("P1 vs P2")
                 w = game.play(p1, p2)
-                print(f"Wp: {w}")
             else:
-                print("P2 vs P1")
                 w = game.play(p2, p1)
-                print(f"Wp: {w}")
                 w = (w+1) % 2
             game.print()
-            print(f"W: {w}")
             tot += w
             if change_order:
                 order = not order

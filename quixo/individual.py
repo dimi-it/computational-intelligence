@@ -16,8 +16,11 @@ class Individual:
     def __str__(self):
         return f"Individual {self._id}, {self._genome.adj}"
 
+    def __repr__(self):
+        return f"I_{self._id}"
+
     def __hash__(self):
-        return hash(self.genome_adj_str)
+        return hash(self.id + hash(self.genome_adj_str))
 
     @property
     def genome(self) -> nx.DiGraph:
