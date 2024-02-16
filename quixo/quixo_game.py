@@ -126,7 +126,6 @@ class QuixoGame(Game):
         '''Perform a move'''
         if player_id > 2:
             return False
-        # Oh God, Numpy arrays
         self.__take((from_pos[1], from_pos[0]), player_id)
         self.__slide((from_pos[1], from_pos[0]), slide)
 

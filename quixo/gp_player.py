@@ -12,11 +12,32 @@ from quixo.value_point import ValuePoint
 
 
 class GeneticProgrammingPlayer(Player):
-    def __init__(self, brain: Individual, enable_random_move: Optional[bool] = False):
+    def __init__(self, brain: Individual, enable_random_move: Optional[bool] = False, loop_avoidance_limit: int = 5):
         super().__init__()
         self._brain = brain
         self._enable_random_move = enable_random_move
+        self._loop_avoidance_limit = loop_avoidance_limit
         self._rnd = Random(brain.genome_adj_str)
+        self._move_count = 0
+        self._rnd_move_count = 0
+        self._last_move = None
+        self._last_move_occurrences = 0
+
+    @property
+    def move_count(self) -> int:
+        return self._move_count
+
+    @property
+    def rnd_move_count(self) -> int:
+        return self._rnd_move_count
+
+    @property
+    def rnd_move_percentage(self) -> float:
+        return self._rnd_move_count / self._move_count * 100
+
+    def reset_counters(self):
+        self._move_count = 0
+        self._rnd_move_count = 0
 
     def _make_move_recursive(self, node: Node, game: QuixoGame) -> tuple[ValuePoint, Optional[MyMove]]:
         if node.is_terminal:
@@ -33,10 +54,19 @@ class GeneticProgrammingPlayer(Player):
         if node.function.is_action:
             # print(f"Node Res: {result}, Move {node.function.name}")
             if not result.is_nil():
-                test_move = MyMove(result.point, MoveDirection[node.function.name.upper()])
-                if game.is_move_doable(test_move):
-                    print(f"AGENT => Pos: {result}, Dir {node.function.name}")
-                    return result, test_move
+                move = MyMove(result.point, MoveDirection[node.function.name.upper()])
+                if game.is_move_doable(move):
+                    if self._last_move == move and self._last_move_occurrences == self._loop_avoidance_limit:
+                        print("Loop limit reached")
+                        return result, None
+                    else:
+                        if self._last_move == move:
+                            self._last_move_occurrences += 1
+                        else:
+                            self._last_move = move
+                            self._last_move_occurrences = 1
+                        print(f"AGENT => Pos: {result}, Dir {node.function.name}")
+                        return result, move
         return result, None
 
     def make_move(self, game: QuixoGame) -> tuple[tuple[int, int], MoveDirection]:
@@ -48,6 +78,10 @@ class GeneticProgrammingPlayer(Player):
                 move = self._rnd.choice(game.available_moves_list)
                 if game.is_move_doable(move):
                     break
+            self._last_move = move
+            self._last_move_occurrences = 1
+            self._rnd_move_count += 1
             print(f"AGENT RND => Pos: {move.position}, Dir: {move.direction}")
+        self._move_count += 1
         return move.to_tuple
 
