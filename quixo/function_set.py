@@ -109,21 +109,21 @@ class FunctionSet:
             inputs=3,
             op=_fun_if
         ),
-        # Function(
-        #     name="Mine",
-        #     inputs=1,
-        #     op=_fun_mine
-        # ),
-        # Function(
-        #     name="Yours",
-        #     inputs=1,
-        #     op=_fun_yours
-        # ),
-        # Function(
-        #     name="Open",
-        #     inputs=1,
-        #     op=_fun_open
-        # ),
+        Function(
+            name="Mine",
+            inputs=1,
+            op=_fun_mine
+        ),
+        Function(
+            name="Yours",
+            inputs=1,
+            op=_fun_yours
+        ),
+        Function(
+            name="Open",
+            inputs=1,
+            op=_fun_open
+        ),
         *_actions_set
     ]
 

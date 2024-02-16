@@ -63,15 +63,15 @@ class QuixoGame(Game):
                 return self._board[0, y]
         # if a player has completed the principal diagonal
         if self._board[0, 0] != -1 and all(
-            [self._board[x, x]
-                for x in range(self._board.shape[0])] == self._board[0, 0]
+                [self._board[x, x]
+                 for x in range(self._board.shape[0])] == self._board[0, 0]
         ):
             # return the relative id
             return self._board[0, 0]
         # if a player has completed the secondary diagonal
         if self._board[0, -1] != -1 and all(
-            [self._board[x, -(x + 1)]
-             for x in range(self._board.shape[0])] == self._board[0, -1]
+                [self._board[x, -(x + 1)]
+                 for x in range(self._board.shape[0])] == self._board[0, -1]
         ):
             # return the relative id
             return self._board[0, -1]
@@ -104,7 +104,6 @@ class QuixoGame(Game):
         if move not in self.available_moves_set or self.is_other_player_pos(move.position_reversed):
             return False
         return True
-
 
     def play(self, player1: Player, player2: Player) -> int:
         '''Play the game. Returns the winning player'''
