@@ -26,6 +26,10 @@ class GeneticProgrammingPlayer(Player):
         self._last_move_occurrences = 0
 
     @property
+    def brain(self):
+        return self._brain
+
+    @property
     def move_count(self) -> int:
         return self._move_count
 
@@ -38,7 +42,7 @@ class GeneticProgrammingPlayer(Player):
         return self._rnd_move_count / self._move_count * 100
 
     def _set_rnd(self):
-        self._rnd = Random(self._brain.genome_adj_str)
+        self._rnd = Random(self._brain.random_seed)
 
     def reset_counters(self):
         self._move_count = 0
@@ -82,7 +86,10 @@ class GeneticProgrammingPlayer(Player):
         return result, None
 
     def make_move(self, game: QuixoGame) -> tuple[tuple[int, int], MoveDirection]:
-        _, move = self._make_move_recursive(list(self._brain.genome.nodes)[0], game)
+        if len(self._brain.genome) == 0:
+            move = None
+        else:
+            _, move = self._make_move_recursive(list(self._brain.genome.nodes)[0], game)
         if move is None:
             # print("Damn, no doable move found ")
             assert self._enable_random_move, "Random move not enabled, no move available"

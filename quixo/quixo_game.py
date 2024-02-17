@@ -50,7 +50,7 @@ class QuixoGame(Game):
     @staticmethod
     def get_results_over_x_games(p1: Player, p2: Player, games: int, change_order: bool = True, reset_rnd_gen: bool = False) -> tuple[int, int]:
         tot = 0
-        order = False
+        order = True if change_order else False
         for i in range(games):
             p1.reset(reset_rnd_gen)
             p2.reset(reset_rnd_gen)

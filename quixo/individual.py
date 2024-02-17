@@ -3,6 +3,7 @@ from typing import Optional, List, Sequence
 import networkx as nx
 import matplotlib.pyplot as plt
 
+from quixo.decorator import classproperty
 from quixo.node import Node
 
 
@@ -41,6 +42,14 @@ class Individual:
     def traversal_list(self) -> List[Node]:
         assert self._genome is not None, "Genome not defined"
         return list(nx.dfs_preorder_nodes(self._genome, source=list(self._genome.nodes)[0]))
+
+    @cached_property
+    def random_seed(self):
+        return str(self.id) + self.genome_adj_str
+
+    @staticmethod
+    def generate_random_individual(id: int) -> 'Individual':
+        return Individual(id, nx.DiGraph())
 
     def print_graph(self):
         # pos = graphviz_layout(self._genome, prog='dot')

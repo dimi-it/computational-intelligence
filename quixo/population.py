@@ -1,14 +1,17 @@
 import math
 from dataclasses import dataclass, field
 from typing import List, Optional
+from itertools import chain
 
 from quixo.crossover import Crossover
 from quixo.data_bags import PopulationParameters
 from quixo.function_set import FunctionSet
+from quixo.game import Player
 from quixo.gp_player import GeneticProgrammingPlayer
 from quixo.individual import Individual
 from quixo.initializer import Initializer
 from quixo.mutation import Mutation
+from quixo.my_random_player import MyRandomPlayer
 from quixo.quixo_game import QuixoGame
 from quixo.terminal_set import TerminalSet
 
@@ -37,7 +40,7 @@ Individuals: {len(self._individuals)}"""
         initializer = Initializer(self._population_param)
         self._individuals = initializer.initialize_population()
 
-    def selection(self) -> List[Individual]:
+    def _fitnessless_selection(self) -> List[Individual]:
         selected = []
         results = {}
         tournament_size = 2 ** self._population_param.tournament_depth
@@ -46,7 +49,7 @@ Individuals: {len(self._individuals)}"""
                 tournament_individuals = self._population_param.rnd.sample(self.individuals, k=tournament_size)
             else:
                 tournament_individuals = self._population_param.rnd.choices(self.individuals, k=tournament_size)
-            print(f"Tournament {i}: {tournament_individuals}")
+            # print(f"Tournament {i}: {tournament_individuals}")
             winner = self._tournament(tournament_individuals)
             if winner in results:
                 results[winner] += 1
@@ -61,28 +64,62 @@ Individuals: {len(self._individuals)}"""
         # print(f"Selected: {selected}")
         return selected
 
-    def _tournament(self, individuals: List[Individual]) -> Individual:
-        print(individuals)
+    def _interactive_selection_against_random(self, individuals: List[individuals]):
+        selected = []
+        for ind in individuals:
+            tournament_individuals = [
+                ind,
+                Individual.generate_random_individual(self._population_param.rnd.randint(-100000000, 0)),
+                Individual.generate_random_individual(self._population_param.rnd.randint(-100000000, 0)),
+                ind
+            ]
+            winner = self._tournament(tournament_individuals, override_depth=2)
+            # print(f"W{repr(winner)}")
+            if winner == ind:
+                selected.append(winner)
+        print(f"Selected(interactive): {len(selected)}")
+        return selected
+
+    def _tournament(self, individuals: List[Individual], override_depth: Optional[int] = None) -> Individual:
+        # print(individuals)
         this_level_individuals = individuals
         next_level_individuals = []
-        for d in range(self._population_param.tournament_depth):
+        depth = self._population_param.tournament_depth if override_depth is None else override_depth
+        for d in range(depth):
             for i in range(0, len(this_level_individuals), 2):
-                next_level_individuals.append(this_level_individuals[
-                                                  i + self._match(this_level_individuals[i],
-                                                                  this_level_individuals[i + 1])
-                                                  ])
+                i1 = this_level_individuals[i]
+                i2 = this_level_individuals[i + 1]
+                if i1 == i2:
+                    next_level_individuals.append(i1)
+                else:
+                    next_level_individuals.append(this_level_individuals[i + self._match(i1, i2)])
             this_level_individuals = next_level_individuals
             next_level_individuals = []
         assert len(this_level_individuals) == 1, f"Expected only one individual left, got {len(this_level_individuals)}"
         return this_level_individuals[0]
 
     def _match(self, i1: Individual, i2: Individual) -> int:
-        game = QuixoGame()
         p1 = GeneticProgrammingPlayer(i1, enable_random_move=self._population_param.player_param.enable_random_move,
                                       loop_avoidance_limit=self._population_param.player_param.loop_avoidance_limit)
         p2 = GeneticProgrammingPlayer(i2, enable_random_move=self._population_param.player_param.enable_random_move,
                                       loop_avoidance_limit=self._population_param.player_param.loop_avoidance_limit)
+        return Population._match_players(p1, p2)
+
+    # def _match_random(self, i: Individual, is_first: bool = True) -> int:
+    #     p1 = GeneticProgrammingPlayer(i, enable_random_move=self._population_param.player_param.enable_random_move,
+    #                                   loop_avoidance_limit=self._population_param.player_param.loop_avoidance_limit)
+    #     p2 = MyRandomPlayer(self._population_param.rnd.randint(1,10000))
+    ################ check return order point
+    #     if is_first:
+    #         return Population._match_players(p1, p2)
+    #     else:
+    #         return Population._match_players(p2, p1)
+
+    @staticmethod
+    def _match_players(p1: Player, p2: Player) -> int:
+        game = QuixoGame()
         w = game.play(p1, p2)
+        # print(f"p1{repr(p1.brain)}, p2{repr(p2.brain)}")
         # print(f"W: {w}")
         return w
 
@@ -96,7 +133,7 @@ Individuals: {len(self._individuals)}"""
                                                        k=self._population_param.population_size)
 
         crossover_count = int(self._population_param.crossover_probability * self._population_param.population_size)
-        crossover_parents = self._population_param.rnd.choices(selected_parents, k=crossover_count*2)
+        crossover_parents = self._population_param.rnd.choices(selected_parents, k=crossover_count * 2)
         for i in range(crossover_count):
             child = Crossover.one_node_xover(crossover_parents[2 * i], crossover_parents[2 * i + 1],
                                              self._population_param, count + id_offset)
@@ -108,7 +145,8 @@ Individuals: {len(self._individuals)}"""
         reproduction_count = self._population_param.population_size - crossover_count
         reproduction_parents = self._population_param.rnd.choices(selected_parents, k=reproduction_count)
         for i in range(reproduction_count):
-            child = Individual(count + id_offset, reproduction_parents[i].genome, parents_id=[reproduction_parents[i].id])
+            child = Individual(count + id_offset, reproduction_parents[i].genome,
+                               parents_id=[reproduction_parents[i].id])
             if mutations[count]:
                 child = Mutation.one_node_mutation(child, self._population_param, child.id)
             childs.append(child)
@@ -117,7 +155,8 @@ Individuals: {len(self._individuals)}"""
 
     def proceed_generation(self):
         print(self)
-        self._selected_parents = self.selection()
+        self._selected_parents = self._fitnessless_selection()
+        self._selected_parents = self._interactive_selection_against_random(self._selected_parents)
         childs = self.recombination(self._selected_parents)
         self._individuals = childs
         self._generation += 1
