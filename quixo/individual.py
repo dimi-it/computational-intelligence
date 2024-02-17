@@ -1,7 +1,9 @@
 from functools import cached_property
+from random import Random
 from typing import Optional, List, Sequence
 import networkx as nx
 import matplotlib.pyplot as plt
+import pickle
 
 from quixo.decorator import classproperty
 from quixo.node import Node
@@ -14,6 +16,7 @@ class Individual:
         self._genome = genome
         self._id = id
         self._parenst_id = parents_id
+        self._fitness = None
 
     def __str__(self):
         return f"Individual {self._id}, {self._genome.adj}"
@@ -34,6 +37,14 @@ class Individual:
         assert self._id is not None, "Id not defined"
         return self._id
 
+    @property
+    def fitness(self) -> float:
+        return self._fitness
+
+    @fitness.setter
+    def fitness(self, value: float):
+        self._fitness = value
+
     @cached_property
     def genome_adj_str(self):
         return str(self._genome.adj)
@@ -50,6 +61,14 @@ class Individual:
     @staticmethod
     def generate_random_individual(id: int) -> 'Individual':
         return Individual(id, nx.DiGraph())
+
+    @staticmethod
+    def generate_from_file(filename: str) -> 'Individual':
+        genome = pickle.load(open(filename, 'rb'))
+        return Individual(Random(filename).randint(-100000000, 0), genome)
+
+    def save_to_file(self, filename: str):
+        pickle.dump(self._genome, open(filename, 'wb'))
 
     def print_graph(self):
         # pos = graphviz_layout(self._genome, prog='dot')

@@ -37,6 +37,7 @@ class PopulationParameters:
     keep_best: bool = field(default=True)
     crossover_probability: float = field(default=.8)
     mutation_probability: float = field(default=.5)
+    round_against_random: int = field(default=100)
 
 
     @property

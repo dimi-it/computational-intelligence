@@ -36,19 +36,50 @@ Individuals: {len(self._individuals)}"""
     def bests(self) -> List[Individual]:
         return self._bests
 
+    @property
+    def selected_parents(self) -> List[Individual]:
+        return self._selected_parents
+
     def initialize(self):
         initializer = Initializer(self._population_param)
         self._individuals = initializer.initialize_population()
 
-    def _fitnessless_selection(self) -> List[Individual]:
+    def _fitness_selection_no_coevolution(self, individuals: List[individuals]) -> List[Individual]:
+        fitnesses = []
+        selected = []
+        randoms = [Individual.generate_random_individual(self._population_param.rnd.randint(-100000000, 0)) for _ in
+                   range(self._population_param.round_against_random)]
+        for ind in individuals:
+            flag = True
+            count = 0
+            for r in randoms:
+                if flag:
+                    w = self._match(ind, r)
+                    if w == 0:
+                        count += 1
+                else:
+                    w = self._match(r, ind)
+                    if w == 1:
+                        count += 1
+                flag = not flag
+            fitness = count / self._population_param.round_against_random
+            fitnesses.append(fitness)
+            ind.fitness = fitness
+        print(f"Ind avg: {sum([i.fitness for i in individuals]) / self._population_param.population_size}")
+        selected = self._population_param.rnd.choices(individuals, weights=fitnesses, k=self._population_param.selection_size)
+        print(f"Sel avg: {sum([i.fitness for i in selected]) / self._population_param.selection_size}")
+        return selected
+
+
+    def _fitnessless_selection_coevolution(self, individuals: List[individuals]) -> List[Individual]:
         selected = []
         results = {}
         tournament_size = 2 ** self._population_param.tournament_depth
         for i in range(self._population_param.selection_size):
             if tournament_size < self._population_param.population_size:
-                tournament_individuals = self._population_param.rnd.sample(self.individuals, k=tournament_size)
+                tournament_individuals = self._population_param.rnd.sample(individuals, k=tournament_size)
             else:
-                tournament_individuals = self._population_param.rnd.choices(self.individuals, k=tournament_size)
+                tournament_individuals = self._population_param.rnd.choices(individuals, k=tournament_size)
             # print(f"Tournament {i}: {tournament_individuals}")
             winner = self._tournament(tournament_individuals)
             if winner in results:
@@ -153,10 +184,18 @@ Individuals: {len(self._individuals)}"""
             count += 1
         return childs
 
+    def _set_best(self, individuals: List[Individual]):
+        best = max(individuals, key=lambda ind: ind.fitness)
+        self._bests.append(best)
+        print(f"Best fitness: {best.fitness}")
+
     def proceed_generation(self):
         print(self)
-        self._selected_parents = self._fitnessless_selection()
-        self._selected_parents = self._interactive_selection_against_random(self._selected_parents)
+        # self._selected_parents = self._fitnessless_selection_coevolution()
+        # self._selected_parents = self._interactive_selection_against_random(self._individuals)
+        # self._selected_parents = self._fitnessless_selection_coevolution(self._selected_parents)
+        self._selected_parents = self._fitness_selection_no_coevolution(self.individuals)
+        self._set_best(self.individuals)
         childs = self.recombination(self._selected_parents)
         self._individuals = childs
         self._generation += 1
