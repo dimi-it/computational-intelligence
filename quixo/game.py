@@ -35,6 +35,9 @@ class Player(ABC):
 
     @abstractmethod
     def reset(self, also_rnd: bool = False):
+        """
+        Reset the player
+        """
         pass
 
 

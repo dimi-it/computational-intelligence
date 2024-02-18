@@ -17,6 +17,9 @@ class Initializer:
         self._population_param = population_param
 
     def initialize_population(self) -> Sequence[Individual]:
+        """
+        Initialize a random population based on the parameters
+        """
         assert self._population_param.init_param.use_grow or self._population_param.init_param.use_full, "No initialization method defined(use grow, full or both)"
 
         usable_depth = self._population_param.agent_param.max_depth - 1
@@ -49,7 +52,13 @@ class Initializer:
         return genomes
 
     def _create_tree(self, depth: int, is_full: bool) -> nx.DiGraph:
+        """
+        Create a random individual genome graph tree
+        """
         def _add_node_to_graph(graph: nx.DiGraph, previous_layer_nodes: List[Node], in_layer_nodes: List[Node], ):
+            """
+            Add node and edge to the graph
+            """
             in_layer_count = 0
             for p_n in previous_layer_nodes:
                 for _ in range(p_n.function.inputs):

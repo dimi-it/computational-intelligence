@@ -18,8 +18,14 @@ class MyMove:
 
     @property
     def to_tuple(self) -> tuple[tuple[int, int], MoveDirection]:
+        """
+        Return the tuple composition of the values
+        """
         return (self.position[0], self.position[1]), self.direction
 
     @cached_property
     def position_reversed(self) -> Tuple[int, int]:
+        """
+        Return the position with axis reversed
+        """
         return self.position[1], self.position[0]

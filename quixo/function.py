@@ -7,12 +7,18 @@ from quixo.value_point import ValuePoint
 
 
 def _fun_default(inputs: Sequence[ValuePoint], game: QuixoGame) -> ValuePoint:
+    """
+    Default function, return the first element of the sequence
+    """
     assert len(inputs) == 1, f"Expected 1 inputs got {len(inputs)}"
     return inputs[0]
 
 
 @dataclass
 class Function:
+    """
+    Define a function node
+    """
     name: str
     inputs: int
     outputs: int = field(default=1)

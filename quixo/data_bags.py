@@ -10,6 +10,9 @@ from quixo.value_point import ValuePoint
 
 @dataclass
 class InitParameters:
+    """
+    Initialization parameters
+    """
     use_grow: bool = field(default=True)
     use_full: bool = field(default=True)
     use_different_depth: bool = field(default=True)
@@ -18,15 +21,26 @@ class InitParameters:
 
 @dataclass
 class AgentParameters:
+    """
+    Agent specific parameters
+    """
     max_depth: int
+
 
 @dataclass
 class PlayerParameters:
+    """
+    Player specific parameters
+    """
     enable_random_move: bool = field(default=True)
     loop_avoidance_limit: int = field(default=5)
 
+
 @dataclass
 class PopulationParameters:
+    """
+    Population parameters
+    """
     agent_param: AgentParameters
     init_param: InitParameters
     player_param: PlayerParameters
@@ -38,7 +52,6 @@ class PopulationParameters:
     crossover_probability: float = field(default=.8)
     mutation_probability: float = field(default=.5)
     round_against_random: int = field(default=100)
-
 
     @property
     def random_bool(self) -> bool:

@@ -13,6 +13,9 @@ class Mutation:
     @staticmethod
     def one_node_mutation(p: Individual,
                           population_param: PopulationParameters, id: Optional[int] = None) -> Individual:
+        """
+        Mutate a random node of the individual genome, changing it with a similar one
+        """
         p_genome = deepcopy(p.genome)
         p_edge = GraphExtended.choice_edge(p_genome, population_param.rnd)
         p_root = list(p_genome.nodes)[0]

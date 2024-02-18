@@ -14,13 +14,22 @@ class MyRandomPlayer(Player):
         self._set_rnd()
 
     def _set_rnd(self):
+        """
+        Set the random generator
+        """
         self._rnd = Random(self._seed)
 
     def reset(self, also_rnd: bool = False):
+        """
+        Reset the player
+        """
         if also_rnd:
             self._set_rnd()
 
     def make_move(self, game: QuixoGame) -> tuple[tuple[int, int], MoveDirection]:
+        """
+        Make a random move
+        """
         while True:
             move = self._rnd.choice(game.available_moves_list)
             if game.is_move_doable(move):

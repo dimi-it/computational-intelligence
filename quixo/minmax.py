@@ -19,11 +19,17 @@ class MinMaxPlayer(Player):
         pass
 
     def make_move(self, game: QuixoGame) -> tuple[tuple[int, int], MoveDirection]:
+        """
+        Make the move
+        """
         _, move = self._recursive_analysis(game, self._search_depth, True, - MinMaxPlayer.MAX_VALUE,
                                            MinMaxPlayer.MAX_VALUE)
         return move.to_tuple
 
     def _game_evaluation(self, game: QuixoGame, winner: int) -> int:
+        """
+        Evaluate the current game situation
+        """
         if winner == -1:
             return self._player_evaluation(game, game.player_id) - self._player_evaluation(game,
                                                                                            (game.player_id + 1) % 2)
@@ -33,6 +39,9 @@ class MinMaxPlayer(Player):
             return - MinMaxPlayer.MAX_VALUE
 
     def _player_evaluation(self, game: QuixoGame, player_id: int) -> int:
+        """
+        Evaluate the player situation
+        """
         columns_occurrencies = (game.board == player_id).sum(axis=0).tolist()
         rows_occurrencies = (game.board == player_id).sum(axis=1).tolist()
         diagonals_occurrencies = [(game.board.diagonal() == player_id).sum(),
@@ -51,6 +60,9 @@ class MinMaxPlayer(Player):
         return result
 
     def _recursive_analysis(self, game: QuixoGame, current_depth: int, is_maximizing: bool, alpha: int, beta: int) -> tuple[int, Optional[MyMove]]:
+        """
+        Do the minmax algorithm by recursevly analyze and evaluating possible solution
+        """
         available_moves = game.current_player_available_move_list
         top_evaluation = - MinMaxPlayer.MAX_VALUE if is_maximizing else MinMaxPlayer.MAX_VALUE
         top_move = None

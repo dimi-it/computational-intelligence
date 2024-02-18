@@ -15,6 +15,9 @@ class QuixoGame(Game):
 
     @cached_property
     def available_moves_list(self) -> List[MyMove]:
+        """
+        Returned the cached list of all the available moves
+        """
         moves = list()
         for i in range(self.BOARD_DIM):
             for j in range(self.BOARD_DIM):
@@ -42,31 +45,52 @@ class QuixoGame(Game):
 
     @property
     def current_player_available_move_list(self):
+        """
+        Return the player effectively available moves
+        """
         possible_values = (self.player_id, -1)
         return [m for m in self.available_moves_list if self.board[m.position] in possible_values]
 
     @cached_property
     def available_moves_set(self) -> Set[MyMove]:
+        """
+        Return the cached set of the available moves
+        """
         return set(self.available_moves_list)
 
     @property
     def move_count(self) -> int:
+        """
+        Return the move count
+        """
         return self._move_count
 
     @property
     def player_id(self) -> int:
+        """
+        Return the current player id
+        """
         return self.current_player_idx
 
     @property
     def board(self) -> np.ndarray:
+        """
+        Return the board
+        """
         return self._board
 
     @property
     def board_clone(self) -> np.ndarray:
+        """
+        Return the board clone
+        """
         return deepcopy(self._board)
 
     @staticmethod
     def get_results_over_x_games(p1: Player, p2: Player, games: int, change_order: bool = True, reset_rnd_gen: bool = False) -> tuple[int, int]:
+        """
+        Play x games and return the per player scores
+        """
         tot = 0
         order = True if change_order else False
         for i in range(games):
@@ -85,7 +109,9 @@ class QuixoGame(Game):
         return games - tot, tot
 
     def check_winner(self) -> int:
-        '''Check the winner. Returns the player ID of the winner if any, otherwise returns -1'''
+        """
+        Check the winner
+        """
         # for each row
         for x in range(self._board.shape[0]):
             # if a player has completed an entire row
@@ -115,35 +141,52 @@ class QuixoGame(Game):
         return -1
 
     def _check_pos(self, pos: Sequence[int]):
+        """
+        Check the position validity
+        """
         assert len(pos) == 2, f"Expected 2 dimensions instead got {pos}"
         assert pos[0] >= 0 or pos[0] < self.BOARD_DIM, f"Expected pos between 0-{self.BOARD_DIM} got {pos[0]}"
         assert pos[1] >= 0 or pos[1] < self.BOARD_DIM, f"Expected pos between 0-{self.BOARD_DIM} got {pos[1]}"
 
     def is_current_player_pos(self, pos: Sequence[int]) -> bool:
+        """
+        Return true if is the player position
+        """
         self._check_pos(pos)
         if self._board[pos] == self.current_player_idx:
             return True
         return False
 
     def is_other_player_pos(self, pos: Sequence[int]) -> bool:
+        """
+        Return true if is the opponent position
+        """
         self._check_pos(pos)
         if self._board[pos] != self.current_player_idx and self._board[pos] != -1:
             return True
         return False
 
     def is_void_pos(self, pos: Sequence[int]) -> bool:
+        """
+        Return true if is a void position
+        """
         self._check_pos(pos)
         if self._board[pos] == -1:
             return True
         return False
 
     def is_move_doable(self, move: MyMove) -> bool:
+        """
+        Return true if the move is really doable
+        """
         if move not in self.available_moves_set or self.is_other_player_pos(move.position_reversed):
             return False
         return True
 
     def play(self, player1: Player, player2: Player) -> int:
-        '''Play the game. Returns the winning player'''
+        """
+        Play the game
+        """
         players = [player1, player2]
         winner = -1
         while winner < 0:
@@ -161,22 +204,32 @@ class QuixoGame(Game):
         return winner
 
     def move(self, from_pos: tuple[int, int], slide: MoveDirection, player_id: int):
+        """
+        Make single move from outside
+        """
         self.__move(from_pos, slide, player_id)
         self.current_player_idx = (self.current_player_idx + 1) % 2
         self._move_count += 1
 
     def __move(self, from_pos: tuple[int, int], slide: MoveDirection, player_id: int):
-        '''Perform a move'''
+        """
+        Make move
+        """
         if player_id > 2:
             return False
         self.__take((from_pos[1], from_pos[0]), player_id)
         self.__slide((from_pos[1], from_pos[0]), slide)
 
     def __take(self, from_pos: tuple[int, int], player_id: int):
+        """
+        Take piece
+        """
         self._board[from_pos] = player_id
 
     def __slide(self, from_pos: tuple[int, int], slide: MoveDirection):
-        '''Slide the other pieces'''
+        """
+        Slide piece
+        """
         piece = self._board[from_pos]
         # if the player wants to slide it to the left
         if slide == MoveDirection.LEFT:

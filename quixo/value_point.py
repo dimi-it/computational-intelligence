@@ -17,13 +17,22 @@ class ValuePoint:
             return f"P{self._value[0]}{self._value[1]}"
 
     def is_nil(self) -> bool:
+        """
+        Return true if value point is NIL
+        """
         return self._value is None
 
     @property
     def point(self) -> Tuple[int, int]:
+        """
+        Return the value point position tuple
+        """
         assert not self.is_nil(), "ValuePoint is None"
         return self._value
 
     @classproperty
     def NIL(cls) -> 'ValuePoint':
+        """
+        Generate a NIL value point
+        """
         return ValuePoint(None)

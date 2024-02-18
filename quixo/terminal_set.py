@@ -15,12 +15,21 @@ class TerminalSet:
 
     @classproperty
     def set(cls) -> List[ValuePoint]:
+        """
+        Return the terminal set
+        """
         return cls._set
 
     @classmethod
     def get_random_terminal(cls, rnd: Random, to_exclude: Optional[ValuePoint] = None) -> ValuePoint:
+        """
+        Get random value point from terminal set
+        """
         return _get_random_from_set(cls._set, rnd, to_exclude)
 
     @classmethod
     def get_random_terminals(cls, rnd: Random, count) -> List[ValuePoint]:
+        """
+        Get randoms value points from terminal set
+        """
         return rnd.choices(cls._set, k=count)

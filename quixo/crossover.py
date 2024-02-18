@@ -15,6 +15,10 @@ class Crossover:
     @staticmethod
     def one_node_xover(p1: Individual, p2: Individual,
                        population_param: PopulationParameters, id: Optional[int] = None) -> Individual:
+        """
+        Makes the crossover between two individuals genome, by replacing a random subgraph of the first with a random subgraph of the second.
+        Return a new individual.
+        """
         p1_genome = deepcopy(p1.genome)
         p2_genome = deepcopy(p2.genome)
         p1_edge = GraphExtended.choice_edge(p1_genome, population_param.rnd)

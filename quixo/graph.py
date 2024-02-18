@@ -8,6 +8,9 @@ from quixo.node import Node
 class GraphExtended:
     @staticmethod
     def remove_unconnected(G: nx.DiGraph, root: Node):
+        """
+        Remove unconnected nodes and subgraph from the root node
+        """
         H = nx.Graph()
         H.add_edges_from(G.edges)
         H.add_nodes_from(G.nodes)
@@ -16,11 +19,17 @@ class GraphExtended:
 
     @staticmethod
     def reidentify_nodes(G: nx.DiGraph, node: Node):
+        """
+        Reassign id starting from 0 to the graph breadth first(left child id < right child id)
+        """
         node.id = 0
         _ = GraphExtended._reidentify_nodes_recursive(G, node, 1)
 
     @staticmethod
     def _reidentify_nodes_recursive(G: nx.DiGraph, node: Node, count: int) -> int:
+        """
+        Reassign id starting recursevely
+        """
         fan_out = [v for (u, v) in G.out_edges(node)]
         for n in fan_out:
             n.id = count
@@ -31,6 +40,9 @@ class GraphExtended:
 
     @staticmethod
     def choice_edge(p_genome: nx.DiGraph, rnd: Random) -> (Node, Node):
+        """
+        Choose a random edge in the graph
+        """
         p_node = rnd.choice(list(p_genome.nodes)[1:])
         p_parent_edge = list(p_genome.in_edges(p_node))
         assert len(

@@ -27,35 +27,60 @@ class GeneticProgrammingPlayer(Player):
 
     @property
     def brain(self):
+        """
+        Return the individual
+        """
         return self._brain
 
     @property
     def move_count(self) -> int:
+        """
+        Return the move played
+        """
         return self._move_count
 
     @property
     def rnd_move_count(self) -> int:
+        """
+        Return the random move played
+        """
         return self._rnd_move_count
 
     @property
     def rnd_move_percentage(self) -> float:
+        """
+        Return the random move percentage
+        """
         return self._rnd_move_count / self._move_count * 100
 
     def _set_rnd(self):
+        """
+        Set random seed
+        """
         self._rnd = Random(self._brain.random_seed)
 
     def reset_counters(self):
+        """
+        Reset counters
+        """
         self._move_count = 0
         self._rnd_move_count = 0
         self._last_move = None
         self._last_move_occurrences = 0
 
     def reset(self, also_rnd: bool = False):
+        """
+        Reset player
+        """
         self.reset_counters()
         if also_rnd:
             self._set_rnd()
 
     def _make_move_recursive(self, node: Node, game: QuixoGame) -> tuple[ValuePoint, Optional[MyMove]]:
+        """
+        Make move recursively, analyze the genome graph, depth first, in search of the first doable move.
+        Return the tuple[value returned by the node, final move]
+        """
         if node.is_terminal:
             return node.value_point, None
 
@@ -86,6 +111,9 @@ class GeneticProgrammingPlayer(Player):
         return result, None
 
     def make_move(self, game: QuixoGame) -> tuple[tuple[int, int], MoveDirection]:
+        """
+        Make the move, if no move found analyzing the graph, make a random move.
+        """
         if len(self._brain.genome) == 0:
             move = None
         else:
