@@ -162,6 +162,8 @@ class QuixoGame(Game):
 
     def move(self, from_pos: tuple[int, int], slide: MoveDirection, player_id: int):
         self.__move(from_pos, slide, player_id)
+        self.current_player_idx = (self.current_player_idx + 1) % 2
+        self._move_count += 1
 
     def __move(self, from_pos: tuple[int, int], slide: MoveDirection, player_id: int):
         '''Perform a move'''

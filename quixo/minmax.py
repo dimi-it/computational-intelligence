@@ -23,8 +23,8 @@ class MinMaxPlayer(Player):
                                            MinMaxPlayer.MAX_VALUE)
         return move.to_tuple
 
-    def _game_evaluation(self, game: QuixoGame, winner: Optional[int] = None) -> int:
-        if winner is None:
+    def _game_evaluation(self, game: QuixoGame, winner: int) -> int:
+        if winner == -1:
             return self._player_evaluation(game, game.player_id) - self._player_evaluation(game,
                                                                                            (game.player_id + 1) % 2)
         elif winner == game.player_id:
@@ -52,7 +52,7 @@ class MinMaxPlayer(Player):
 
     def _recursive_analysis(self, game: QuixoGame, current_depth: int, is_maximizing: bool, alpha: int, beta: int) -> tuple[int, Optional[MyMove]]:
         available_moves = game.current_player_available_move_list
-        top_evaluation = - MinMaxPlayer.MAX_VALUE
+        top_evaluation = - MinMaxPlayer.MAX_VALUE if is_maximizing else MinMaxPlayer.MAX_VALUE
         top_move = None
 
         winner = game.check_winner()
