@@ -1,7 +1,11 @@
+import concurrent.futures
 import math
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Callable
 from itertools import chain
+from tqdm import tqdm
+from multiprocessing.pool import ThreadPool
 
 from quixo.crossover import Crossover
 from quixo.data_bags import PopulationParameters
@@ -44,32 +48,75 @@ Individuals: {len(self._individuals)}"""
         initializer = Initializer(self._population_param)
         self._individuals = initializer.initialize_population()
 
-    def _fitness_selection_no_coevolution(self, individuals: List[individuals]) -> List[Individual]:
+    def _fitness_evaluation_no_coevolution(self, individuals: List[individuals]) -> List[Individual]:
         fitnesses = []
         selected = []
         randoms = [Individual.generate_random_individual(self._population_param.rnd.randint(-100000000, 0)) for _ in
                    range(self._population_param.round_against_random)]
-        for ind in individuals:
+
+        for individual in individuals:
             flag = True
             count = 0
             for r in randoms:
                 if flag:
-                    w = self._match(ind, r)
+                    w = self._match(individual, r)
                     if w == 0:
                         count += 1
                 else:
-                    w = self._match(r, ind)
+                    w = self._match(r, individual)
                     if w == 1:
                         count += 1
                 flag = not flag
             fitness = count / self._population_param.round_against_random
             fitnesses.append(fitness)
-            ind.fitness = fitness
+            individual.fitness = fitness
         print(f"Ind avg: {sum([i.fitness for i in individuals]) / self._population_param.population_size}")
-        selected = self._population_param.rnd.choices(individuals, weights=fitnesses, k=self._population_param.selection_size)
+        selected = self._fitness_selection_roulette(individuals, fitnesses)
         print(f"Sel avg: {sum([i.fitness for i in selected]) / self._population_param.selection_size}")
         return selected
 
+    def _fitness_evaluation_no_coevolution_mixed(self, individuals: List[individuals]) -> List[Individual]:
+        fitnesses = []
+        selected = []
+        pre_trained_count = 10
+        randoms = [Individual.generate_random_individual(self._population_param.rnd.randint(-100000000, 0)) for _ in
+                   range(self._population_param.round_against_random)]
+        pre_trained = [Individual.generate_from_file(f"bests/run_1/{f}.graph") for f in range(pre_trained_count)]
+        pre_trained = list(chain.from_iterable((x, x) for x in pre_trained))
+        adversaries = [*randoms, *pre_trained]
+        for individual in individuals:
+            flag = True
+            count = 0
+            for a in adversaries:
+                if flag:
+                    w = self._match(individual, a)
+                    if w == 0:
+                        count += 1
+                else:
+                    w = self._match(a, individual)
+                    if w == 1:
+                        count += 1
+                flag = not flag
+            fitness = count / len(adversaries)
+            fitnesses.append(fitness)
+            individual.fitness = fitness
+        print(f"Ind avg: {sum([i.fitness for i in individuals]) / self._population_param.population_size}")
+        selected = self._fitness_selection_roulette(individuals, fitnesses)
+        print(f"Sel avg: {sum([i.fitness for i in selected]) / self._population_param.selection_size}")
+        return selected
+
+
+    def _fitness_selection_roulette(self, individuals: List[individuals], fitnesses: List[float]) -> List[Individual]:
+        selected = self._population_param.rnd.choices(individuals, weights=fitnesses,
+                                                      k=self._population_param.selection_size)
+        return selected
+
+    def _fitness_selection_tournament(self, individuals: List[individuals], fitnesses: List[float]) -> List[Individual]:
+        selected = []
+        for i in range(self._population_param.selection_size):
+            tournament_individuals = self._population_param.rnd.choices(individuals, k=2 ** self._population_param.tournament_depth)
+            selected.append(self._tournament(tournament_individuals, self._tournament_fitness))
+        return selected
 
     def _fitnessless_selection_coevolution(self, individuals: List[individuals]) -> List[Individual]:
         selected = []
@@ -81,7 +128,7 @@ Individuals: {len(self._individuals)}"""
             else:
                 tournament_individuals = self._population_param.rnd.choices(individuals, k=tournament_size)
             # print(f"Tournament {i}: {tournament_individuals}")
-            winner = self._tournament(tournament_individuals)
+            winner = self._tournament(tournament_individuals, self._tournament_match)
             if winner in results:
                 results[winner] += 1
             else:
@@ -104,14 +151,14 @@ Individuals: {len(self._individuals)}"""
                 Individual.generate_random_individual(self._population_param.rnd.randint(-100000000, 0)),
                 ind
             ]
-            winner = self._tournament(tournament_individuals, override_depth=2)
+            winner = self._tournament(tournament_individuals, self._tournament_match,override_depth=2)
             # print(f"W{repr(winner)}")
             if winner == ind:
                 selected.append(winner)
         print(f"Selected(interactive): {len(selected)}")
         return selected
 
-    def _tournament(self, individuals: List[Individual], override_depth: Optional[int] = None) -> Individual:
+    def _tournament(self, individuals: List[Individual], tournament_fun: Callable[[int, Individual, Individual], int], override_depth: Optional[int] = None, ) -> Individual:
         # print(individuals)
         this_level_individuals = individuals
         next_level_individuals = []
@@ -128,6 +175,15 @@ Individuals: {len(self._individuals)}"""
             next_level_individuals = []
         assert len(this_level_individuals) == 1, f"Expected only one individual left, got {len(this_level_individuals)}"
         return this_level_individuals[0]
+
+    def _tournament_match(self, id: int, i1: Individual, i2: Individual) -> int:
+        return id + self._match(i1, i2)
+
+    def _tournament_fitness(self, id: int, i1: Individual, i2: Individual) -> int:
+        if i1.fitness > i2.fitness:
+            return id + 0
+        else:
+            return id + 1
 
     def _match(self, i1: Individual, i2: Individual) -> int:
         p1 = GeneticProgrammingPlayer(i1, enable_random_move=self._population_param.player_param.enable_random_move,
@@ -194,7 +250,8 @@ Individuals: {len(self._individuals)}"""
         # self._selected_parents = self._fitnessless_selection_coevolution()
         # self._selected_parents = self._interactive_selection_against_random(self._individuals)
         # self._selected_parents = self._fitnessless_selection_coevolution(self._selected_parents)
-        self._selected_parents = self._fitness_selection_no_coevolution(self.individuals)
+        self._selected_parents = self._fitness_evaluation_no_coevolution(self.individuals)
+        #self._selected_parents = self._fitness_evaluation_no_coevolution_mixed(self.individuals)
         self._set_best(self.individuals)
         childs = self.recombination(self._selected_parents)
         self._individuals = childs
@@ -203,5 +260,5 @@ Individuals: {len(self._individuals)}"""
         #     i.print_graph()
 
     def proceed_x_generation(self, x):
-        for _ in range(x):
+        for _ in tqdm(range(x)):
             self.proceed_generation()

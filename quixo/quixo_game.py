@@ -1,3 +1,4 @@
+from copy import deepcopy
 from functools import cached_property
 from typing import Sequence, Set, List
 
@@ -39,6 +40,11 @@ class QuixoGame(Game):
                         moves.append(MyMove((i, j), MoveDirection.LEFT))
         return moves
 
+    @property
+    def current_player_available_move_list(self):
+        possible_values = (self.player_id, -1)
+        return [m for m in self.available_moves_list if self.board[m.position] in possible_values]
+
     @cached_property
     def available_moves_set(self) -> Set[MyMove]:
         return set(self.available_moves_list)
@@ -46,6 +52,18 @@ class QuixoGame(Game):
     @property
     def move_count(self) -> int:
         return self._move_count
+
+    @property
+    def player_id(self) -> int:
+        return self.current_player_idx
+
+    @property
+    def board(self) -> np.ndarray:
+        return self._board
+
+    @property
+    def board_clone(self) -> np.ndarray:
+        return deepcopy(self._board)
 
     @staticmethod
     def get_results_over_x_games(p1: Player, p2: Player, games: int, change_order: bool = True, reset_rnd_gen: bool = False) -> tuple[int, int]:
@@ -141,6 +159,9 @@ class QuixoGame(Game):
                 return 0
             # self.print()
         return winner
+
+    def move(self, from_pos: tuple[int, int], slide: MoveDirection, player_id: int):
+        self.__move(from_pos, slide, player_id)
 
     def __move(self, from_pos: tuple[int, int], slide: MoveDirection, player_id: int):
         '''Perform a move'''
