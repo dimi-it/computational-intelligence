@@ -26,5 +26,5 @@ Repository for the PoliTo course of Computational Intelligence
 - 05/01/24, **Peer review LAB10** <br>
     [lucasolaini](https://github.com/lucasolaini/computational-intelligence/issues/8) <br>
     [gabriquaranta](https://github.com/gabriquaranta/computational-intelligence/issues/5)
-- 24/12/23, **Quixo**<br>
+- 18/02/24, **Quixo**<br>
     [QUIXO](https://github.com/dimi-it/computational-intelligence/tree/main/quixo)
