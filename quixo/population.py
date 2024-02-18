@@ -99,7 +99,7 @@ Individuals: {len(self._individuals)}"""
         pre_trained_count = 10
         randoms = [Individual.generate_random_individual(self._population_param.rnd.randint(-100000000, 0)) for _ in
                    range(self._population_param.round_against_random)]
-        pre_trained = [Individual.generate_from_file(f"bests/run_1/{f}.graph") for f in range(pre_trained_count)]
+        pre_trained = [Individual.generate_from_file(f"dev_stuff/bests/run_1/{f}.graph") for f in range(pre_trained_count)]
         pre_trained = list(chain.from_iterable((x, x) for x in pre_trained))
         adversaries = [*randoms, *pre_trained]
         for individual in individuals:
