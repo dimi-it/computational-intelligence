@@ -1,1 +1,1 @@
-# See attached report.pdf for details
+# See attached quixo_report.pdf for details
