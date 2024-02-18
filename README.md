@@ -21,8 +21,10 @@ Repository for the PoliTo course of Computational Intelligence
 - 09/12/23, **Peer review LAB9** <br>
     [Matteo-Celia](https://github.com/Matteo-Celia/Computational-Intelligence-2023-2024/issues/4) <br>
     [Niiikkkk](https://github.com/Niiikkkk/Computational-Intelligence/issues/2)
-- 24/12/23, **LAB10**, nim <br>
+- 24/12/23, **LAB10**<br>
     [LAB10](https://github.com/dimi-it/computational-intelligence/tree/main/lab10)
-- 05/01/24, **Peer review LAB9** <br>
+- 05/01/24, **Peer review LAB10** <br>
     [lucasolaini](https://github.com/lucasolaini/computational-intelligence/issues/8) <br>
     [gabriquaranta](https://github.com/gabriquaranta/computational-intelligence/issues/5)
+- 18/02/24, **Quixo**<br>
+    [QUIXO](https://github.com/dimi-it/computational-intelligence/tree/main/quixo)
